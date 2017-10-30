@@ -1,0 +1,14 @@
+{
+  "name": "bitcoin_fiat_historical",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "taish",
+  "license": "MIT",
+  "dependencies": {
+    "ccxt": "^1.9.284"
+  }
+}
