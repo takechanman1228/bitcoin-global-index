@@ -9,6 +9,9 @@
   "author": "taish",
   "license": "MIT",
   "dependencies": {
-    "ccxt": "^1.9.284"
+    "ccxt": "^1.9.284",
+    "dateformat": "^3.0.2",
+    "googleapis": "^22.2.0",
+    "request-promise": "^4.2.2"
   }
 }
