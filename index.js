@@ -36,7 +36,8 @@ var bithumb = ccxt.bithumb()
 // support coinone
 
 class TickData {
-  constructor(id, bid, ask, volume, timestamp) {
+  constructor(currency, id, bid, ask, volume, timestamp) {
+    this.currency = currency
     this.id = id
     this.bid = bid
     this.ask = ask
@@ -47,67 +48,67 @@ class TickData {
 
 async function fetchBitstamp() {
   let ticker = await bitstamp.fetchTicker('BTC/USD')
-  return new TickData(bitstamp.id, ticker['bid'], ticker['ask'], ticker['baseVolume'], ticker['timestamp'])
+  return new TickData('USD', bitstamp.id, ticker['bid'], ticker['ask'], ticker['baseVolume'], ticker['timestamp'])
 }
 
 async function fetchLakebtc() {
   let ticker = await lakebtc.fetchTicker('BTC/USD')
-  return new TickData(lakebtc.id, ticker['bid'], ticker['ask'], ticker['quoteVolume'], ticker['timestamp'])
+  return new TickData('USD', lakebtc.id, ticker['bid'], ticker['ask'], ticker['quoteVolume'], ticker['timestamp'])
 }
 
 async function fetchGemini() {
   let ticker = await gemini.fetchTicker('BTC/USD')
-  return new TickData(gemini.id, ticker['bid'], ticker['ask'], ticker['baseVolume'], ticker['timestamp'])
+  return new TickData('USD', gemini.id, ticker['bid'], ticker['ask'], ticker['baseVolume'], ticker['timestamp'])
 }
 
 async function fetchGdax() {
   let ticker = await gdax.fetchTicker('BTC/USD')
-  return new TickData(gdax.id, ticker['bid'], ticker['ask'], ticker['quoteVolume'], ticker['timestamp'])
+  return new TickData('USD', gdax.id, ticker['bid'], ticker['ask'], ticker['quoteVolume'], ticker['timestamp'])
 }
 
 async function fetchBitfinex() {
   let ticker = await bitfinex.fetchTicker('BTC/USD')
-  return new TickData(bitfinex.id, ticker['bid'], ticker['ask'], ticker['baseVolume'], ticker['timestamp'])
+  return new TickData('USD', bitfinex.id, ticker['bid'], ticker['ask'], ticker['baseVolume'], ticker['timestamp'])
 }
 
 async function fetchPoloniex() {
   let ticker = await poloniex.fetchTicker('BTC/USDT')
-  return new TickData(poloniex.id, ticker['bid'], ticker['ask'], ticker['baseVolume'], ticker['timestamp'])
+  return new TickData('USD', poloniex.id, ticker['bid'], ticker['ask'], ticker['baseVolume'], ticker['timestamp'])
 }
 
 async function fetchBinance() {
   let ticker = await binance.fetchTicker('BTC/USDT')
-  return new TickData(binance.id, ticker['bid'], ticker['ask'], ticker['baseVolume'], ticker['timestamp'])
+  return new TickData('USD', binance.id, ticker['bid'], ticker['ask'], ticker['baseVolume'], ticker['timestamp'])
 }
 
 async function fetchHitbtc() {
   let ticker = await hitbtc.fetchTicker('BTC/USD')
-  return new TickData('hitbtc', ticker['bid'], ticker['ask'], ticker['baseVolume'], ticker['timestamp'])
+  return new TickData('USD', 'hitbtc', ticker['bid'], ticker['ask'], ticker['baseVolume'], ticker['timestamp'])
 }
 
 async function fetchCoincheck() {
   let ticker = await coincheck.fetchTicker('BTC/JPY')
-  return new TickData(coincheck.id, ticker['bid'], ticker['ask'], ticker['quoteVolume'], ticker['timestamp'])
+  return new TickData('JPY', coincheck.id, ticker['bid'], ticker['ask'], ticker['quoteVolume'], ticker['timestamp'])
 }
 
 async function fetchBitflyer() {
   let ticker = await bitflyer.fetchTicker('BTC/JPY')
-  return new TickData(bitflyer.id, ticker['bid'], ticker['ask'], ticker['baseVolume'], ticker['timestamp'])
+  return new TickData('JPY', bitflyer.id, ticker['bid'], ticker['ask'], ticker['baseVolume'], ticker['timestamp'])
 }
 
 async function fetchQuoine() {
   let ticker = await quoine.fetchTicker('BTC/JPY')
-  return new TickData(quoine.id, ticker['bid'], ticker['ask'], ticker['baseVolume'], ticker['timestamp'])
+  return new TickData('JPY', quoine.id, ticker['bid'], ticker['ask'], ticker['baseVolume'], ticker['timestamp'])
 }
 
 async function fetchZaif() {
   let ticker = await zaif.fetchTicker('BTC/JPY')
-  return new TickData(zaif.id, ticker['bid'], ticker['ask'], ticker['quoteVolume'], ticker['timestamp'])
+  return new TickData('JPY', zaif.id, ticker['bid'], ticker['ask'], ticker['quoteVolume'], ticker['timestamp'])
 }
 
 async function fetchBithumb() {
   let ticker = await bithumb.fetchTicker('BTC/KRW')
-  return new TickData(bithumb.id, ticker['bid'], ticker['ask'], ticker['quoteVolume'], ticker['timestamp'])
+  return new TickData('KRW', bithumb.id, ticker['bid'], ticker['ask'], ticker['quoteVolume'], ticker['timestamp'])
 }
 
 async function fetchKorbit() {
@@ -115,7 +116,7 @@ async function fetchKorbit() {
     uri: 'https://api.korbit.co.kr/v1/ticker/detailed?currency_pair=btc_krw',
     json: true
   })
-  return new TickData('korbit', Number(ticker['bid']), Number(ticker['ask']), Number(ticker['volume']), Number(ticker['timestamp']))
+  return new TickData('KRW', 'korbit', Number(ticker['bid']), Number(ticker['ask']), Number(ticker['volume']), Number(ticker['timestamp']))
 }
 
 async function fetchCoinone() {
@@ -123,8 +124,22 @@ async function fetchCoinone() {
     uri: 'https://api.coinone.co.kr/ticker?currency=btc',
     json: true
   })
-  return new TickData('coinone', Number(ticker['last']), Number(ticker['last']), Number(ticker['volume']), ticker['timestamp'])
+  return new TickData('KRW', 'coinone', Number(ticker['last']), Number(ticker['last']), Number(ticker['volume']), ticker['timestamp'])
 }
+
+
+function sum(tickdataArray) {
+  return tickdataArray.reduce((sum, tick) => sum + tick.volume, 0)
+}
+
+function weight(tickdataArray) {
+  return tickdataArray.reduce((sum, tick) => sum + tick.volume * tick.ask, 0)
+}
+
+function weightedAverage(tickdataArray) {
+  return weight(tickdataArray) / sum(tickdataArray)
+}
+
 
 async function fetchAllTickData() {
   return await Promise.all([
@@ -146,16 +161,25 @@ async function fetchAllTickData() {
   ])
 }
 
-function uploadToFusionTable(tickDataArray) {
-  let now = Date(tickDataArray[0].timestamp)
+function uploadToFusionTable(tickDataArray, rates, bitcoinIndexes) {
+  let now = Date(tickDataArray[1].timestamp)
   let date = dateFormat(now ,"UTC:yyyy/mm/dd HH:MM:ss")
+  rateKey = 'USD_JPY, USD_KRW, JPY_USD, JPY_KRW, KRW_USD, KRW_JPY'
+  rateValue = [rates['USD_JPY'], rates['USD_KRW'], rates['JPY_USD'], rates['JPY_KRW'], rates['KRW_USD'], rates['KRW_JPY']].join(',')
+
+  indexKey = 'JBI, KRBI, USBI, USDTBI'
+  indexValue = bitcoinIndexes.join(',')
 
   let key_array = [].concat(...tickDataArray.map(tick => [(tick.id+'_bid'), (tick.id+'_ask'), (tick.id+'_volume')]))
-  let key = key_array.join(',')
+  let tickKey = key_array.join(',')
+  let key = `date, ${indexKey}, ${rateKey}, ${tickKey}`
+  console.log(key)
   let valueArray = [].concat(...tickDataArray.map(tick => [tick.bid, tick.ask, tick.volume]))
-  let value = valueArray.join(',')
+  let tickValue = valueArray.join(',')
+  let value = `'${date}', ${indexValue}, ${rateValue}, ${tickValue}`
+  console.log(value)
   let fusionTableId = "1GvvslUCdWxK_Ll1VZP3SzxRJXmwTEHEADdue34cu"
-  var sql = `INSERT INTO ${fusionTableId} (date, ${key}) VALUES ('${date}', ${value})`
+  var sql = `INSERT INTO ${fusionTableId} (${key}) VALUES (${value})`
 
   jwtClient.authorize(function (err, tokens) {
     if (err) {
@@ -165,10 +189,9 @@ function uploadToFusionTable(tickDataArray) {
 
     fusiontables.query.sql({auth: jwtClient, sql: sql, key: apiKey}, (err, res) => {
       if (err) {
-          console.log(err)
-          throw err
+        console.log(err)
       } else {
-          console.log(res)
+        console.log(res)
       }
     })
   })
@@ -181,11 +204,22 @@ function sleep(time) {
     }, time)
   })
 }
+
 async function main() {
   while (true) {
     try {
+      let rates = await rp({uri: 'https://inagoflyer.appspot.com/fxrate', json: true})
       let results = await fetchAllTickData()
-      uploadToFusionTable(results)
+      jpyTick = results.filter(tick => ['coincheck', 'quoine', 'zaif', 'bitflyer'].includes(tick.id))
+      krwTick = results.filter(tick => ['bithumb', 'korbit', 'coinone'].includes(tick.id))
+      usTick = results.filter(tick => ['gemini', 'bitstamp', 'gdax', 'lakebtc', 'kraken', 'bitfinex'].includes(tick.id))
+      usdtTick = results.filter(tick => ['bitfinex', 'poloniex', 'binance', 'hitbtc'].includes(tick.id))
+      let krbi = weightedAverage(krwTick)
+      let jbi = weightedAverage(jpyTick)
+      let usbi = weightedAverage(usTick)
+      let usdtbi = weightedAverage(usdtTick)
+      bitcoinIndexes = [jbi, krbi, usbi, usdtbi]
+      uploadToFusionTable(results, rates, bitcoinIndexes)
     } catch (error) {
       console.log(error);
       await sleep(5)
