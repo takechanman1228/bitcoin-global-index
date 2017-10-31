@@ -8,6 +8,7 @@ const fusiontables = google.fusiontables('v2')
 const key = require('./jbi-your.json')
 const apiKey = 'AIzaSyD5SspH8gZYBYlld6sN5Ofv-ayZ2sHCvyk'
 const fetchAllTickData = require('./fetchAllTickData')
+const TickData = require('./tickData')
 
 let jwtClient = new google.auth.JWT(
   key.client_email,
@@ -40,7 +41,7 @@ function createSql(tickDataArray, rates, bitcoinIndexes) {
   rateKey = 'USD_JPY, USD_KRW, JPY_USD, JPY_KRW, KRW_USD, KRW_JPY'
   rateValue = [rates['USD_JPY'], rates['USD_KRW'], rates['JPY_USD'], rates['JPY_KRW'], rates['KRW_USD'], rates['KRW_JPY']].join(',')
 
-  indexKey = 'JBI, KRBI, USBI, USDTBI'
+  indexKey = 'GLBI, JBI, KRBI, USBI, USDTBI'
   indexValue = bitcoinIndexes.join(',')
 
   let key_array = [].concat(...tickDataArray.map(tick => [(tick.id+'_bid'), (tick.id+'_ask'), (tick.id+'_volume')]))
@@ -63,11 +64,20 @@ async function main() {
       krwTick = results.filter(tick => ['bithumb', 'korbit', 'coinone'].includes(tick.id))
       usTick = results.filter(tick => ['gemini', 'bitstamp', 'gdax', 'lakebtc', 'kraken', 'bitfinex'].includes(tick.id))
       usdtTick = results.filter(tick => ['bitfinex', 'poloniex', 'binance', 'hitbtc'].includes(tick.id))
+      let usdGlobalTick = results.map(tick => {
+        if (tick.currency == 'JPY') {
+          return new TickData('USD', tick.id, tick.bid * rates['JPY_USD'], tick.ask * rates['JPY_USD'], tick.volume, tick.timestamp)
+        } else if (tick.currency == 'KRW') {
+          return new TickData('USD', tick.id, tick.bid * rates['KRW_USD'], tick.ask * rates['KRW_USD'], tick.volume, tick.timestamp)
+        }
+        return tick
+      })
       let krbi = weightedAverage(krwTick)
       let jbi = weightedAverage(jpyTick)
       let usbi = weightedAverage(usTick)
       let usdtbi = weightedAverage(usdtTick)
-      bitcoinIndexes = [jbi, krbi, usbi, usdtbi]
+      let glbi = weightedAverage(usdGlobalTick)
+      bitcoinIndexes = [glbi, jbi, krbi, usbi, usdtbi]
       let sql = createSql(results, rates, bitcoinIndexes)
       insert(sql)
     } catch (error) {

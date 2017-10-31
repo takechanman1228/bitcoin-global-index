@@ -1,5 +1,6 @@
 const ccxt = require('ccxt')
 const rp = require('request-promise')
+const TickData = require('./tickData')
 
 var gemini = ccxt.gemini()
 var bitstamp = ccxt.bitstamp()
@@ -20,17 +21,6 @@ var quoine = ccxt.quoine()
 var bithumb = ccxt.bithumb()
 // support korbit
 // support coinone
-
-class TickData {
-  constructor(currency, id, bid, ask, volume, timestamp) {
-    this.currency = currency
-    this.id = id
-    this.bid = bid
-    this.ask = ask
-    this.volume = volume
-    this.timestamp = timestamp
-  }
-}
 
 async function fetchBitstamp() {
   let ticker = await bitstamp.fetchTicker('BTC/USD')
