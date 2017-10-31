@@ -63,7 +63,7 @@ async function fetchGemini() {
 
 async function fetchGdax() {
   let ticker = await gdax.fetchTicker('BTC/USD')
-  return new TickData('USD', gdax.id, ticker['bid'], ticker['ask'], ticker['quoteVolume'], ticker['timestamp'])
+  return new TickData('USD', gdax.id, ticker['bid'], ticker['ask'], ticker['baseVolume'], ticker['timestamp'])
 }
 
 async function fetchBitfinex() {
@@ -222,7 +222,7 @@ async function main() {
       uploadToFusionTable(results, rates, bitcoinIndexes)
     } catch (error) {
       console.log(error);
-      await sleep(5)
+      await sleep(5 * 1000)
       continue
     }
     // wait 1 minute
