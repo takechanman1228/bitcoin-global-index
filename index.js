@@ -63,7 +63,7 @@ async function main() {
       jpyTick = results.filter(tick => ['coincheck', 'quoine', 'zaif', 'bitflyer'].includes(tick.id))
       krwTick = results.filter(tick => ['bithumb', 'korbit', 'coinone'].includes(tick.id))
       usTick = results.filter(tick => ['gemini', 'bitstamp', 'gdax', 'lakebtc', 'kraken', 'bitfinex'].includes(tick.id))
-      usdtTick = results.filter(tick => ['bitfinex', 'poloniex', 'binance', 'hitbtc'].includes(tick.id))
+      usdtTick = results.filter(tick => ['bitfinex', 'poloniex', 'binance', 'hitbtc', 'bittrex'].includes(tick.id))
       let usdGlobalTick = results.map(tick => {
         if (tick.currency == 'JPY') {
           return new TickData('USD', tick.id, tick.bid * rates['JPY_USD'], tick.ask * rates['JPY_USD'], tick.volume, tick.timestamp)

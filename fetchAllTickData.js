@@ -12,6 +12,7 @@ var bitfinex = ccxt.bitfinex() // Bittrex support USDT & USD
 var poloniex = ccxt.poloniex()
 var binance = ccxt.binance()
 var hitbtc = ccxt.hitbtc2()
+var bittrex = ccxt.bittrex()
 // JPY
 var coincheck = ccxt.coincheck()
 var zaif = ccxt.zaif()
@@ -21,6 +22,11 @@ var quoine = ccxt.quoine()
 var bithumb = ccxt.bithumb()
 // support korbit
 // support coinone
+
+async function fetchBittrex() {
+  let ticker = await bittrex.fetchTicker('BTC/USDT')
+  return new TickData('USD', bittrex.id, ticker['bid'], ticker['ask'], ticker['baseVolume'], ticker['timestamp'])
+}
 
 async function fetchBitstamp() {
   let ticker = await bitstamp.fetchTicker('BTC/USD')
@@ -105,6 +111,7 @@ async function fetchCoinone() {
 
 async function fetchAllTickData() {
   return await Promise.all([
+    fetchBittrex(),
     fetchBitstamp(),
     fetchLakebtc(),
     fetchGemini(),
