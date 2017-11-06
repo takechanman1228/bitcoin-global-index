@@ -2,24 +2,24 @@ const ccxt = require('ccxt')
 const rp = require('request-promise')
 const TickData = require('./tickData')
 
-var gemini = ccxt.gemini()
-var bitstamp = ccxt.bitstamp()
-var gdax = ccxt.gdax()
-var lakebtc = ccxt.lakebtc()
-var kraken = ccxt.kraken()
+var gemini = new ccxt.gemini()
+var bitstamp = new ccxt.bitstamp()
+var gdax = new ccxt.gdax()
+var lakebtc = new ccxt.lakebtc()
+var kraken = new ccxt.kraken()
 // USDT
-var bitfinex = ccxt.bitfinex() // Bittrex support USDT & USD
-var poloniex = ccxt.poloniex()
-var binance = ccxt.binance()
-var hitbtc = ccxt.hitbtc2()
-var bittrex = ccxt.bittrex()
+var bitfinex = new ccxt.bitfinex() // Bittrex support USDT & USD
+var poloniex = new ccxt.poloniex()
+var binance = new ccxt.binance()
+var hitbtc = new ccxt.hitbtc2()
+var bittrex = new ccxt.bittrex()
 // JPY
-var coincheck = ccxt.coincheck()
-var zaif = ccxt.zaif()
-var bitflyer = ccxt.bitflyer()
-var quoine = ccxt.quoine()
+var coincheck = new ccxt.coincheck()
+var zaif = new ccxt.zaif()
+var bitflyer = new ccxt.bitflyer()
+var quoine = new ccxt.quoine()
 // KRW
-var bithumb = ccxt.bithumb()
+var bithumb = new ccxt.bithumb()
 // support korbit
 // support coinone
 
@@ -85,7 +85,7 @@ async function fetchQuoineJPY() {
 
 async function fetchQuoineBTC() {
   let ticker = await quoine.fetchTicker('BTC/USD')
-  return new TickData('USD', quoine.id, ticker['bid'], ticker['ask'], ticker['baseVolume'], ticker['timestamp'])
+  return new TickData('USD', 'quoine-usd', ticker['bid'], ticker['ask'], ticker['baseVolume'], ticker['timestamp'])
 }
 
 
