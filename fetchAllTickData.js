@@ -83,7 +83,7 @@ async function fetchQuoineJPY() {
   return new TickData('JPY', quoine.id, ticker['bid'], ticker['ask'], ticker['baseVolume'], ticker['timestamp'])
 }
 
-async function fetchQuoineBTC() {
+async function fetchQuoineUSD() {
   let ticker = await quoine.fetchTicker('BTC/USD')
   return new TickData('USD', 'quoine-usd', ticker['bid'], ticker['ask'], ticker['baseVolume'], ticker['timestamp'])
 }
