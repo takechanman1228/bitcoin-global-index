@@ -78,10 +78,16 @@ async function fetchBitflyer() {
   return new TickData('JPY', bitflyer.id, ticker['bid'], ticker['ask'], ticker['baseVolume'], ticker['timestamp'])
 }
 
-async function fetchQuoine() {
+async function fetchQuoineJPY() {
   let ticker = await quoine.fetchTicker('BTC/JPY')
   return new TickData('JPY', quoine.id, ticker['bid'], ticker['ask'], ticker['baseVolume'], ticker['timestamp'])
 }
+
+async function fetchQuoineBTC() {
+  let ticker = await quoine.fetchTicker('BTC/USD')
+  return new TickData('USD', quoine.id, ticker['bid'], ticker['ask'], ticker['baseVolume'], ticker['timestamp'])
+}
+
 
 async function fetchZaif() {
   let ticker = await zaif.fetchTicker('BTC/JPY')
@@ -122,7 +128,8 @@ async function fetchAllTickData() {
     fetchHitbtc(),
     fetchCoincheck(),
     fetchBitflyer(),
-    fetchQuoine(),
+    fetchQuoineJPY(),
+    fetchQuoineUSD(),
     fetchZaif(),
     fetchBithumb(),
     fetchKorbit(),
